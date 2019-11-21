@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+
+
+<html>
+
+<head>
+
+    <title>Page Title</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.js"></script>
+
+    <script
+      src="https://code.jquery.com/jquery-3.4.1.min.js"
+      integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+      crossorigin="anonymous"></script>
+
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+
+      <script>moment().format()</script>
+
+    </head>
+
+<body>
+
+
+<h1>Hello</h1>
+
+
+<div style="max-width: 60%; max-height: 30%;">
+
+<canvas id="chart"></canvas>
+
+
+<script>
+
+    let chartElement = $("#chart");
+    var updateInterval = 1000; // in milliseconds
+    var counter = 1;
+    var numberElements = 3;
+
+    var xlabels = ['12:00', '13:00', '14:00'].map(x => moment(x, 'HH:mm'));
+
+    var chart = new Chart(chartElement, {
+        type:"line",
+        data:{
+            labels: xlabels,
+            datasets: [{
+                label:"temperatures",
+                data: [10, 12, 13],
+                fill:false,
+                borderColor:"red"
+            }]
+        },
+        options: {
+
+        scales: {
+            xAxes: [{
+                type: 'time',
+                time: {
+                    unit: 'hour',
+                    displayFormats: {
+                        hour: 'HH:mm'
+                    }
+                },
+                ticks: {
+                    source: 'labels'
+                },
+            }],
+            yAxes: [{
+                ticks: {
+                    min: 0,
+                    max: 50
+                }
+            }]
+        }
+    }
+
+
+    });
+
+    function addData(data){
+        chart.data.datasets.forEach((ds) => {      
+            ds.data = data.map(x => x['temperature']);
+        });
+        chart.update();
+    }
+
+    
+    function updateData(){
+        $.ajax({
+            type:"GET",
+            url:"http://localhost:3000/api/readings",
+            async:true,
+            success: function (data) {
+                addData(data);
+                setTimeout(updateData, updateInterval);
+            }
+        })
+    }
+
+
+    $(function(){
+        updateData();
+    })
+
+
+</script>
+
+
+</div>
+
+</body>
+
+</html>
